@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer';
 
 export const LAUNCH_PUPPETEER_OPTS = {
-  headless: 'new',
+  headless: false,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
@@ -20,24 +20,39 @@ export const PAGE_PUPPETEER_OPTS = {
 };
 
 export class PuppeteerHandler {
-  constructor() {
+  constructor(site = '') {
     this.browser = null;
+    this.page = null;
+    this.site = site
   }
-  async initBrowser() {
-    this.browser = await puppeteer.launch(LAUNCH_PUPPETEER_OPTS);
+
+  async initBrowser(site) {
+    this.site = site
+    this.browser = await puppeteer.launch({ headless: false});
+    this.page = await this.browser.newPage();
+    await this.gotoPage(this.site);
   }
+
   closeBrowser() {
     this.browser.close();
   }
-  async getPageContent(url) {
+
+  async gotoPage(url){
     if (!this.browser) {
       await this.initBrowser();
     }
-
     try {
-      const page = await this.browser.newPage();
-      await page.goto(url, PAGE_PUPPETEER_OPTS);
-      const content = await page.content();
+      await this.page.goto(url, PAGE_PUPPETEER_OPTS);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async getPageContent(url = '') {
+    try {
+      if(url)
+        await this.gotoPage(url);
+      const content = await this.page.content();
       return content;
     } catch (err) {
       throw err;

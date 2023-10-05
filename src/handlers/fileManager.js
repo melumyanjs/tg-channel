@@ -1,7 +1,6 @@
 import path from "path";
 import fs from "fs";
 import chalk from "chalk";
-import JSONStream from "JSONStream"
 import { __dirname } from "../helpers/utils.js";
 
 export async function saveData(data) {
