@@ -1,15 +1,18 @@
 import cherio from "cherio";
-import { clearLine, sleep } from "../helpers/utils.js";
+import { clearLine, isPrivate, randomFromInterval, sleep } from "../helpers/utils.js";
 import { p } from "../index.js";
 
 export async function channelStat(item) {
-  const url = `https://tgstat.ru/channel/${item.name}/stat`;
-  const detailContent = await p.getPageContent(url);
+  const detailContent = await p.getPageContent(item.urlstat);
   const $ = cherio.load(detailContent);
   const statList = [];
 
   const lang = clearLine($(".text-left.text-sm-right").find(".mt-4").text());
+    
   let categ = clearLine($(".text-left.text-sm-right").find(".mt-2").text());
+
+  let isClose = isPrivate(clearLine($(".btn.btn-outline-info.btn-rounded.px-3.py-05.font-14.mr-1.mb-15").text()))
+
   let lastIndex = categ.lastIndexOf(" ");
   categ = categ.substring(0, lastIndex);
 
@@ -17,24 +20,23 @@ export async function channelStat(item) {
     (i, el) => {
       statList.push({
         name: clearLine(
-          $(el)
-            .find(".position-absolute.text-uppercase.text-dark.font-12")
-            .text()
-        ),
+          $(el).find(".position-absolute.text-uppercase.text-dark.font-12").text()),
         value: clearLine($(el).find("h2.text-dark").text()),
       });
     }
   );
 
-  if (!statList) {
-    await sleep(10000);
-    await foo(item);
-  }
-  
+  // if (!statList) {
+  //   console.log('stat ', statList)
+  //   await sleep(randomFromInterval(3400, 6800));
+  //   await channelStat(item);
+  // }
+
   return {
-    ...item,
-    statistics: statList,
+    channelId: item._id,
+    isPrivate: isClose,
     lang,
     categories: categ,
+    statistics: statList,
   }
 }

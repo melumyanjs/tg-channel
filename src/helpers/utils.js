@@ -24,3 +24,12 @@ export function subInt(str) {
 
 export const sleep = (waitTimeInMs) =>
   new Promise((resolve) => setTimeout(resolve, waitTimeInMs));
+
+const maxDuration = 5000
+export const randomDuration = () => Math.random() * maxDuration
+
+export const randomFromInterval = (min, max) => Math.random() * (max - min + 1) + min
+
+export function isPrivate(str){
+  return str.toLowerCase() == 'приватный канал'
+}

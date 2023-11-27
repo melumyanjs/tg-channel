@@ -1,0 +1,36 @@
+
+<div class="bg-body-tertiary p-5 rounded">
+    <h1>{{data.namechanel}} ({{data.nameru}})</h1>
+    <div class="mb-1 text-body-secondary">{{data.subscribers}} подписчиков</div>
+    <div class="mb-1 text-body-secondary">
+        {{#if data.isPrivate}}
+          приватный
+        {{else}}
+            не приватный
+        {{/if}}
+    </div>
+    
+    <div class="mb-1 text-body-secondary fst-italic">{{formatTime data.lastpublish "ru-RU"}}: последняя публикация</div>
+    <div class="mb-1 text-body-secondary fst-italic">{{formatTime data.dateparse "ru-RU"}}: дата парсинга</div>
+    <hr/>
+    <p class="card-text mb-auto">
+        {{#if data.description}}
+            {{data.description}}
+        {{else}}
+            Нет описания
+        {{/if}}
+    </p>
+    <br/>   
+    <hr/>
+    <h4>Подробная статистика</h4>
+    {{#each stat}}
+        <p>{{name}}: {{value}}</p>
+    {{/each}}
+
+    <hr/>    <br/>
+    <div class="mb-1 text-body-secondary fst-italic">{{data.categories}}</div>
+    <div class="mb-1 text-body-secondary fst-italic">{{data.lang}}</div>
+    <a href={{data.urlstat}}>ссылка на оригинал</a>
+    <br/>
+    <a href="/">назад</a>
+</div>

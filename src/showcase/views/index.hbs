@@ -1,0 +1,57 @@
+<center>
+    <h2>Витрина tg-stat</h2>
+    <hr />
+    <br />
+    <div class="container">
+        <table id="myTable">
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>namechanel</th>
+                    <th>nameru</th>
+                    <th>category</th>
+                    <th>urlstat</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</center>
+
+<script defer>
+window.onload = function () {
+    $(document).ready(function (){
+        var table = $('#myTable').DataTable({
+            ajax: {
+                url: '/api/data',
+                dataSrc: ''
+            },
+            'processing': true,
+            'language': {
+                'loadingRecords': '&nbsp;',
+                'processing': 'Loading...'
+            },          
+            "columns": [
+                    { "data": "_id" },
+                    { "data": "namechanel" },
+                    { "data": "nameru" },
+                    { "data": "category" },
+                    { "data": "urlstat" },
+                ],
+            columnDefs: [
+                    {
+                        targets: 0,
+                        render: function (data, type, row, meta) {
+                            if (type === 'display') {
+                                data = `<a href='/${encodeURIComponent(data)}' target="_blank">${data}</a>`;
+                            }
+
+                            return data;
+                        }
+                    }
+                ]
+        });
+        
+    });
+}
+    
+</script>

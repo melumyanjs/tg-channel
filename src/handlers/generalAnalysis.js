@@ -1,3 +1,4 @@
+import ora from 'ora';
 import { slugify } from "transliteration";
 import cherio from "cherio";
 import chalk from "chalk";
@@ -5,14 +6,20 @@ import {
   basePathName,
   clearChanelName,
   clearLine,
+  randomFromInterval,
   sleep,
   subInt,
 } from "../helpers/utils.js";
-import { p } from "../index.js";
+import { db, multibar, p } from "../index.js";
+
+const spinner = ora('Начинаем считать каналы')
 
 export async function generalAnalysis(url) {
-  await p.initBrowser(url);
-  console.log("Считаем количество каналов ...");
+  const category = slugify(`${basePathName(url)}`)
+  await p.gotoPage(url);
+  console.log(`Анализ каналов из категории: ${category}`)
+
+  spinner.start()
   while (true) {
     const t = await p.page.$(
       ".btn.btn-light.border.lm-button.py-1.min-width-220px"
@@ -20,18 +27,26 @@ export async function generalAnalysis(url) {
     let isVis = await t.isVisible();
     if (!isVis) break;
     await t.click();
-    await sleep(3000);
+    await sleep(randomFromInterval(3400, 6800));
   }
+  
   const pageContent = await p.page.content();
+  await parseGeneralContent(pageContent, category)
+}
+
+
+
+async function parseGeneralContent(pageContent, category){
   const $ = cherio.load(pageContent);
-
-  const listChannel = [];
-
-  console.log(`Всего каналов: ${$(".text-body").length}`);
+  const countChannel = $(".text-body").length
+  spinner.text(`Всего каналов: ${countChannel}`)
+  spinner.stop()
+  
   console.log("-----------------\n");
-  console.log("Идет парсинг ...");
+  console.log("Парсинг ...");
 
-  $(".text-body").each((i, header) => {
+  const b2 = multibar.create(countChannel, 0);
+  $(".text-body").each(async (i, header) => {
     const url = $(header).attr("href");
     let nameru = $(header).find(".font-16.text-dark.text-truncate").text();
     if (!nameru) nameru = $(header).find(".h4.text-truncate.text-dark").text();
@@ -53,17 +68,18 @@ export async function generalAnalysis(url) {
       $(header).find(".text-center.text-muted.font-12").text()
     );
 
-    const code = slugify(nameru);
-    listChannel.push({
+    await db.insert('channels', {
       namechanel: clearChanelName(basePathName(url)),
-      urlstat: url,
+      category,
+      urlstat: url + '/stat',
       nameru,
       description,
       subscribers,
       lastpublish,
-      filename: `${i + 1} ${code}`,
+      dateparse: new Date().toISOString()
     });
-  });
 
-  return listChannel;
+    b2.increment()
+    b2.update(i+1)
+  });
 }
